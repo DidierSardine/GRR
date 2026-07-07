@@ -102,8 +102,24 @@ class Email{
 					$event->setDescription($resa_info['nom_resa']);
 					$event->setAttendee($A);
 					$event->setUid($guid.'-event');
-					// Si périodicité
-					error_log(json_encode($resa_info)); // placeholder pour voir y'a quoi dans cette valeur le temps de finir ça
+
+					switch ($resa_info['rep_type']) { // Gestion périodicité
+						case 1: // Chaque jour
+							$event->setRRule([
+								Vcalendar::FREQ => Vcalendar::DAILY,
+								Vcalendar::UNTIL => $resa_info['rep_end_date']
+							]);
+							break;
+						case 2: // Chaque semaine
+							$event->setRRule([
+								Vcalendar::FREQ => Vcalendar::WEEKLY,
+								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date']),
+								Vcalendar::INTERVAL => (int)$resa_info['rep_num_weeks'] > 0 ? $resa_info['rep_num_weeks'] : 1,
+								Vcalendar::WKST => "MO",
+								Vcalendar::BYDAY => rep_opt_to_iCal_args($resa_info['rep_opt'])
+							]);
+							break;
+					} // A FAIRE: faire fonctionner la modification de périodicité et implémenter les autres types de périodicité.
 
 
 					// Préparation de la valarm

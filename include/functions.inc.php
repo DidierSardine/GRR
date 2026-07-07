@@ -2791,6 +2791,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 		{
 			$rep_type = $rep_info['rep_type'];
 			$rep_end_date = isset($rep_info['rep_end_date']) ? time_date_string($rep_info['rep_end_date'], $dformat) : '';
+			$rep_end_date_raw = $rep_info['rep_end_date'];
 			$rep_opt = isset($rep_info['rep_opt']) ? $rep_info['rep_opt'] : '';
 			$rep_num_weeks = isset($rep_info['rep_num_weeks']) ? $rep_info['rep_num_weeks'] : 1;
 		}
@@ -2808,6 +2809,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 				$row2 = grr_sql_row($res, 0);
 				$rep_type     = $row2[0];
 				$rep_end_date = time_date_string($row2[1],$dformat);
+				$rep_end_date_raw = $row2[1];
 				$rep_opt      = $row2[2];
 				$rep_num_weeks = $row2[3];
 			}
@@ -3009,6 +3011,12 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
+			'rep_type' => isset($rep_type) ? $rep_type : -1,
+			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
+			'rep_end_date' => isset($rep_end_date_raw) ? $rep_end_date_raw : -1,
+			'rep_month_abs1' => isset($rep_info['rep_month_abs1']) ? $rep_info['rep_month_abs1'] : -1,
+			'rep_month_abs2' => isset($rep_info['rep_month_abs2']) ? $rep_info['rep_month_abs2'] : -1,
 		));
 	}
 
@@ -3047,6 +3055,12 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
+			'rep_type' => isset($rep_type) ? $rep_type : -1,
+			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
+			'rep_end_date' => isset($rep_end_date_raw) ? $rep_end_date_raw : -1,
+			'rep_month_abs1' => isset($rep_info['rep_month_abs1']) ? $rep_info['rep_month_abs1'] : -1,
+			'rep_month_abs2' => isset($rep_info['rep_month_abs2']) ? $rep_info['rep_month_abs2'] : -1,
 		));
 	}
 
@@ -3093,6 +3107,12 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
+			'rep_type' => isset($rep_type) ? $rep_type : -1,
+			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
+			'rep_end_date' => isset($rep_end_date_raw) ? $rep_end_date_raw : -1,
+			'rep_month_abs1' => isset($rep_info['rep_month_abs1']) ? $rep_info['rep_month_abs1'] : -1,
+			'rep_month_abs2' => isset($rep_info['rep_month_abs2']) ? $rep_info['rep_month_abs2'] : -1,
 			));
 		}
 	}
@@ -5725,5 +5745,22 @@ if (isset($_GET["year"]))
 		$year = 1900;
 	if ($year > 2100)
 		$year = 2100;
+}
+
+function rep_opt_to_iCal_args(string $rep_opt) { // Convertis 'rep_opt' en jours pour la répétition dans les iCal
+	// ex: 0100100 -> BYDAY=MO,THU
+	$days = array('SU','MO','TU','WE','TH','FR','SA');
+	$rep_opt_array = str_split($rep_opt);
+	$output = array();
+	$i = 0;
+	foreach ($rep_opt_array as $value) {
+		if ($value == "0") {
+			$i++;
+			continue;
+		}
+		$output[] = $days[$i];
+		$i++;
+	}
+	return $output;
 }
 ?>

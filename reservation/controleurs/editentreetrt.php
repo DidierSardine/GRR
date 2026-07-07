@@ -81,7 +81,6 @@ $form_vars = array(
   'rep_end_day'        => 'int',
   'rep_end_month'      => 'int',
   'rep_end_year'       => 'int', 
-  'rep_id'             => 'int',
   'rep_jour_'          => 'int',
   'cycle_cplt'         => 'string',
   'page'               => 'string', // récupérable dans page_ret, à filtrer parmi celles qui sont acceptables (plannings)
@@ -752,18 +751,21 @@ try {
 			{
                 if (isset($id_first_resa) && ($id_first_resa != 0))
                 {
-                    if (isset($id) && ($id != 0)) // modification d'une résa existante
-                        $message_error = send_mail($id, 2, $dformat, array(), $oldRessource, array(
+                    $rep_info = array(
                             'rep_type' => $rep_type,
                             'rep_end_date' => $rep_enddate,
                             'rep_opt' => $rep_opt,
-                            'rep_num_weeks' => $rep_num_weeks
-                        ), mail_invite: $domaine["mails_ics_active"]);
+                            'rep_num_weeks' => $rep_num_weeks,
+                            'rep_month_abs1' => $rep_month_abs1,
+                            'rep_month_abs2' => $rep_month_abs2
+                            );
+                    if (isset($id) && ($id != 0)) // modification d'une résa existante
+                        $message_error = send_mail($id, 2, $dformat, array(), $oldRessource, rep_info: $rep_info, mail_invite: $domaine["mails_ics_active"]);
                     else // création
                         if ($send_mail_moderate)
-                            $message_error = send_mail($id_first_resa, 5, $dformat, mail_invite: $domaine["mails_ics_active"]); // à modérer
+                            $message_error = send_mail($id_first_resa, 5, $dformat, rep_info: $rep_info, mail_invite: $domaine["mails_ics_active"]); // à modérer
                         else
-                            $message_error = send_mail($id_first_resa, 1, $dformat, array(), $oldRessource, mail_invite: $domaine["mails_ics_active"]);
+                            $message_error = send_mail($id_first_resa, 1, $dformat, array(), $oldRessource, rep_info: $rep_info, mail_invite: $domaine["mails_ics_active"]);
                 }
 				/*else // ici $id_first_resa n'est pas défini ou nul, i.e. la série de réservations n'est pas posée => message à modifier ?
 				{
