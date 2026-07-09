@@ -79,8 +79,18 @@ class Email{
 				// ICS: Ajout résa OK, Modif OK, Suppr OK, reste a ajouter la configuration pour activer ou non l'envoi d'invitation ICS en fonction du domaine / user
 				if($mail_invite == 1 && !empty($resa_info)){ // Si l'envoi d'invitation via ICS est activé et que les infos de résas sont ok on prep un ics
 					// Préparation d'un GUID
-					$hash = strtolower(hash('ripemd128', $resa_info['id_entry'])); # GUID retrouvable avec l'id de la résa (Pour modifier la résa notamment)
+					if (isset($resa_info['rep_id']) && $resa_info['rep_id'] > 0) {
+						error_log('rep !');
+						$hash = strtolower(hash('ripemd128', "rep".$resa_info['rep_id'])); # Hash pour GUID basé sur l'id de la répétition de la résa
+					} else {
+						error_log('not rep');
+						$hash = strtolower(hash('ripemd128', $resa_info['id_entry'])); # Hash pour GUID retrouvable avec l'id de la résa (Pour modifier la résa notamment)
+					}
     				$guid = substr($hash,  0,  8).'-'.substr($hash,  8,  4).'-'.substr($hash, 12,  4).'-'.substr($hash, 16,  4).'-'.substr($hash, 20, 12);
+					error_log('guid : '.$guid);
+					error_log('rep_id : '.$resa_info['rep_id']);
+					error_log(implode(', ', $resa_info));
+					// Fin de la préparation du GUID
 					// Préparation du vcalendar
 					$ical = new Vcalendar();
 					$ical->setUid($guid);

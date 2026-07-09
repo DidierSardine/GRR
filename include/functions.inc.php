@@ -2792,13 +2792,14 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			$rep_type = $rep_info['rep_type'];
 			$rep_end_date = isset($rep_info['rep_end_date']) ? time_date_string($rep_info['rep_end_date'], $dformat) : '';
 			$rep_end_date_raw = $rep_info['rep_end_date'];
+			$rep_id = $rep_info['rep_id'];
 			$rep_opt = isset($rep_info['rep_opt']) ? $rep_info['rep_opt'] : '';
 			$rep_num_weeks = isset($rep_info['rep_num_weeks']) ? $rep_info['rep_num_weeks'] : 1;
 		}
 		else
 		{
 			// Récupération depuis la base (comportement par défaut)
-			$res = grr_sql_query("SELECT rep_type, end_date, rep_opt, rep_num_weeks FROM ".TABLE_PREFIX."_repeat WHERE id='".SecuChaine::ProtectDataSql($repeat_id)."'");
+			$res = grr_sql_query("SELECT rep_type, end_date, rep_opt, rep_num_weeks, id FROM ".TABLE_PREFIX."_repeat WHERE id='".SecuChaine::ProtectDataSql($repeat_id)."'");
 			if (!$res)
 				fatal_error(0, grr_sql_error());
 			$test = grr_sql_count($res);
@@ -2812,6 +2813,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 				$rep_end_date_raw = $row2[1];
 				$rep_opt      = $row2[2];
 				$rep_num_weeks = $row2[3];
+				$rep_id = $row2[4];
 			}
 			grr_sql_free($res);
 		}
@@ -3011,6 +3013,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_id' => isset($rep_id) ? $rep_id : -1,
 			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
 			'rep_type' => isset($rep_type) ? $rep_type : -1,
 			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
@@ -3055,6 +3058,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_id' => isset($rep_id) ? $rep_id : -1,
 			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
 			'rep_type' => isset($rep_type) ? $rep_type : -1,
 			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
@@ -3107,6 +3111,7 @@ function send_mail($id_entry, $action, $dformat, $tab_id_moderes = array(), $old
 			'nom_resa' => $breve_description,
 			'location' => $room_name,
 			'action' => $action,
+			'rep_id' => isset($rep_id) ? $rep_id : -1,
 			'rep_opt' => isset($rep_opt) ? $rep_opt : -1,
 			'rep_type' => isset($rep_type) ? $rep_type : -1,
 			'rep_num_weeks' => isset($rep_num_weeks) ? $rep_num_weeks : -1,
@@ -5762,5 +5767,14 @@ function rep_opt_to_iCal_args(string $rep_opt) { // Convertis 'rep_opt' en jours
 		$i++;
 	}
 	return $output;
+}
+
+function restoreEntries(array $entries) {
+	$query = "UPDATE ".TABLE_PREFIX."_entry SET supprimer = 0 WHERE id IN (".implode(',', $entries).")";
+	$res = grr_sql_query($query);
+	if (!$res) {
+		fatal_error(0, grr_sql_error());
+	}
+	return;
 }
 ?>

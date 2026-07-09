@@ -746,12 +746,15 @@ try {
 		}
 		if ($rep_type != 0) // Réservation périodique
 		{
-			$id_first_resa = mrbsCreateRepeatingEntrys($start_time, $end_time, $rep_type, $rep_enddate, $rep_opt, $room_id, $create_by, $beneficiaire, $beneficiaire_ext, $name, $type, $description, $rep_num_weeks, $option_reservation, $overload_data, $entry_moderate, $rep_jour_c, $courrier, $nbparticipantmax, $rep_month_abs1, $rep_month_abs2, $ignore);
+			[$id_first_resa, $resas_ids, $rep_id] = mrbsCreateRepeatingEntrys($repeat_id ?? null, $start_time, $end_time, $rep_type, $rep_enddate, $rep_opt, $room_id, $create_by, $beneficiaire, $beneficiaire_ext, $name, $type, $description, $rep_num_weeks, $option_reservation, $overload_data, $entry_moderate, $rep_jour_c, $courrier, $nbparticipantmax, $rep_month_abs1, $rep_month_abs2, $ignore);
+            if (!isset($repeat_id) || !$repeat_id > 0)
+                $repeat_id = $rep_id;
 			if (($domaine['mails_active'] == 1 || Settings::get("automatic_mail") == 1) && $envoy_notif == 1)
 			{
                 if (isset($id_first_resa) && ($id_first_resa != 0))
                 {
                     $rep_info = array(
+                            'rep_id' => $repeat_id ?? 0,
                             'rep_type' => $rep_type,
                             'rep_end_date' => $rep_enddate,
                             'rep_opt' => $rep_opt,
@@ -776,6 +779,7 @@ try {
 				}*/
 			}
             mrbsDelEntry(getUserName(), $id, 1, 1);
+            restoreEntries($resas_ids); // Un peu sale, mais permet d'implémenter l'UPSERT sur les résa périodiques sans modifier la DB, après il y a surement de meilleures moyens de le faire.
 		}
 		else // Réservation unique
 		{
