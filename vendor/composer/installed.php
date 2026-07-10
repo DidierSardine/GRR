@@ -3,7 +3,7 @@
         'name' => 'devome/twig',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'ee6aaadc2b5ebec003b8725bca94db92b688df30',
+        'reference' => '82c9975e4c2656b71e34fe0af44bd9db7ba7a576',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'devome/twig' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'ee6aaadc2b5ebec003b8725bca94db92b688df30',
+            'reference' => '82c9975e4c2656b71e34fe0af44bd9db7ba7a576',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

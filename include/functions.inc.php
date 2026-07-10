@@ -5799,4 +5799,5 @@ function get_xth_day_of_month($timestamp) {
 
 	return [$iCalJour, (int)$position];
 }
+
 ?>

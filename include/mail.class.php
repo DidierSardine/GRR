@@ -71,12 +71,6 @@ class Email{
 				$mail->AltBody = 'Ce message ne peut-être affiché.';
 				$ical = null;
 
-				// DEBUG: A RETIRER APRES /!\ **************************************************************
-				// ini_set('display_errors', 1);
-				// error_reporting(E_ALL);
-				// *****************************************************************************************
-
-				// ICS: Ajout résa OK, Modif OK, Suppr OK, reste a ajouter la configuration pour activer ou non l'envoi d'invitation ICS en fonction du domaine / user
 				if($mail_invite == 1 && !empty($resa_info)){ // Si l'envoi d'invitation via ICS est activé et que les infos de résas sont ok on prep un ics
 					// Préparation d'un GUID
 					if (isset($resa_info['rep_id']) && $resa_info['rep_id'] > 0) {
@@ -135,11 +129,13 @@ class Email{
 								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date']),
 								Vcalendar::BYMONTHDAY => (int)date('j', $resa_info['start_time'])
 							]);
+							break;
 						case 4: // Chaque année
 							$event->setRRule([
 								Vcalendar::FREQ => Vcalendar::YEARLY,
 								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date'])
 							]);
+							break;
 						case 5: // Chaque mois, même jour
 							[$jour, $xth] = get_xth_day_of_month($resa_info['start_time']);
 							$event->setRRule([
@@ -149,9 +145,19 @@ class Email{
 								Vcalendar::BYDAY => (string)$jour,
 								Vcalendar::BYSETPOS => (int)$xth,
 							]);
-						
-					} // A FAIRE: faire fonctionner la modification de périodicité et implémenter les autres types de périodicité.
-
+							break;
+						case 7: // Xème jour (LMMJVSD) du mois
+							$joursical = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+							try {
+								$event->setRRule([
+									Vcalendar::FREQ => Vcalendar::MONTHLY,
+									Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date']),
+									Vcalendar::WKST => 'MO',
+									Vcalendar::BYDAY => (string)$joursical[$resa_info['rep_month_abs2']],
+									Vcalendar::BYSETPOS => $resa_info['rep_month_abs1'] + 1
+								]); } catch (Exception $e) {}
+							break;
+					}
 
 					// Préparation de la valarm
 					$alarm = $event->newValarm();
@@ -163,7 +169,7 @@ class Email{
 					$icalstr = $ical->vtimezonePopulate()->createCalendar();
 					$mail->Ical = $icalstr;
 				} // Fin de prep de l'ICS
-				error_log($icalstr);
+
 				if ($username != '') {
 					$mail->SMTPAuth = true;
 				} else {
