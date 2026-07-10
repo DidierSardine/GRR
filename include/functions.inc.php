@@ -5777,4 +5777,26 @@ function restoreEntries(array $entries) {
 	}
 	return;
 }
+
+function get_xth_day_of_month($timestamp) {
+    $joursiCal = [
+        'Monday'    => 'MO',
+        'Tuesday'   => 'TU',
+        'Wednesday' => 'WE',
+        'Thursday'  => 'TH',
+        'Friday'    => 'FR',
+        'Saturday'  => 'SA',
+        'Sunday'    => 'SU'
+    ];
+
+    $jour = date('l', $timestamp); // "Monday", "Tuesday", etc.
+    $numjour = (int)date('j', $timestamp);     // 1 à 31
+
+    $iCalJour = $joursiCal[$jour];
+
+    // Xème jour - ex: 1 pour 1er Lundi du mois
+    $position = ceil($numjour / 7);
+
+	return [$iCalJour, (int)$position];
+}
 ?>

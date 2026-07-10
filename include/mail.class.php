@@ -117,7 +117,7 @@ class Email{
 						case 1: // Chaque jour
 							$event->setRRule([
 								Vcalendar::FREQ => Vcalendar::DAILY,
-								Vcalendar::UNTIL => $resa_info['rep_end_date']
+								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date'])
 							]);
 							break;
 						case 2: // Chaque semaine
@@ -129,6 +129,27 @@ class Email{
 								Vcalendar::BYDAY => rep_opt_to_iCal_args($resa_info['rep_opt'])
 							]);
 							break;
+						case 3: // Chaque mois, même date
+							$event->setRRule([
+								Vcalendar::FREQ => Vcalendar::MONTHLY,
+								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date']),
+								Vcalendar::BYMONTHDAY => (int)date('j', $resa_info['start_time'])
+							]);
+						case 4: // Chaque année
+							$event->setRRule([
+								Vcalendar::FREQ => Vcalendar::YEARLY,
+								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date'])
+							]);
+						case 5: // Chaque mois, même jour
+							[$jour, $xth] = get_xth_day_of_month($resa_info['start_time']);
+							$event->setRRule([
+								Vcalendar::FREQ => Vcalendar::MONTHLY,
+								Vcalendar::UNTIL => DateTimeImmutable::createFromTimestamp($resa_info['rep_end_date']),
+								Vcalendar::WKST => "MO",
+								Vcalendar::BYDAY => (string)$jour,
+								Vcalendar::BYSETPOS => (int)$xth,
+							]);
+						
 					} // A FAIRE: faire fonctionner la modification de périodicité et implémenter les autres types de périodicité.
 
 
@@ -142,7 +163,7 @@ class Email{
 					$icalstr = $ical->vtimezonePopulate()->createCalendar();
 					$mail->Ical = $icalstr;
 				} // Fin de prep de l'ICS
-				
+				error_log($icalstr);
 				if ($username != '') {
 					$mail->SMTPAuth = true;
 				} else {
